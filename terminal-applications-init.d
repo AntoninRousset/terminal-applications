@@ -8,11 +8,11 @@ description="Workaround of the bug that prevents desktop files to launch a termi
 : ${TERMCMD:="xterm -e"}
 
 depend() {
-	after procfs
+	need localmount
 }
 
 start() {
-	ebegin "Copying relevant destkop files to $DEST_FOLDER"
+	ebegin "Changing destkop files $SRC_FOLDERS"
 
 	for src_folder in $SRC_FOLDERS ; do
 		for desktop_file in ${src_folder}/* ; do
@@ -26,7 +26,7 @@ start() {
 }
 
 stop() {
-	ebegin "Removing desktop files from $DEST_FOLDER"
+	ebegin "Reverting destkop files $SRC_FOLDERS"
 	
 	for src_folder in $SRC_FOLDERS ; do
 		for desktop_file in ${src_folder}/* ; do
