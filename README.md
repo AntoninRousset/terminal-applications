@@ -1,2 +1,2 @@
-# terminal-desktop-applications
-Solve the Terminal=True issue of .desktop application file, which does not open a terminal at all.
+# terminal-applications
+Workaround of the bug that prevents desktop files to launch a terminal with Terminal=true
