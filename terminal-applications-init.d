@@ -6,30 +6,24 @@ description="Workaround of the bug that prevents desktop files to launch a termi
 
 : ${SRC_FOLDERS:="/usr/share/applications"}
 : ${TERMCMD:="xterm -e"}
-: ${TMP_FOLDER:="/tmp/.applications"}
+
+if [ "$TERMINALS" != "" ] ; then
+	TERMINALS = "$TERMINALS|"
+	echo $TERMINALS
+fi
+TERMINALS="$TERMINALS[aEkx]term -e|rxvt -e|gnome -e|konsole -e|interix -e|st -e"
 
 depend() {
 	need localmount
 }
 
 start() {
-	mkdir -p "$TMP_FOLDER"
 
 	for src_folder in $SRC_FOLDERS ; do
-
-		ebegin "Binding applications folder: $src_folder"
-		mkdir -p "$TMP_FOLDER/$src_folder"
-		cp -fr "$src_folder/"* "$TMP_FOLDER$src_folder"/
-		mount -o bind "$TMP_FOLDER/$src_folder" "$src_folder"
-
-	done
-
-	ebegin "Changing destkop files"
-	for src_folder in $SRC_FOLDERS ; do
-		
-		for desktop_file in "$TMP_FOLDER/$src_folder/"* ; do
+		ebegin "Changing destkop files in $src_folder"
+		for desktop_file in "${src_folder}/"* ; do
 			if grep -q "Terminal=true" "$desktop_file" ; then
-				sed -i "s/^Terminal=true/Terminal=false/;/Exec=$TERMCMD /!s/^Exec=/Exec=$TERMCMD /" "$desktop_file"
+				sed -i "s/^Terminal=true/Terminal=false/;/Exec=($terminals) /!s/^Exec=/Exec=$TERMCMD /" "$desktop_file"
 			fi
 		done
 	done
@@ -38,15 +32,14 @@ start() {
 }
 
 stop() {
-	ebegin "Reverting applications folders"
-
 	for src_folder in $SRC_FOLDERS ; do
-
-		umount -q $src_folder
-
+		ebegin "Reverting destkop files $src_folder"
+		for desktop_file in "${src_folder}/"* ; do
+			if grep -q "Terminal=false" "$desktop_file" ; then
+				sed -ri "s/^Terminal=false/Terminal=true/;s/^Exec=($terminals) /Exec=/" "$desktop_file"
+			fi
+		done
 	done
-	rm -fr $TMP_FOLDER
 
 	eend 0
 }
-
