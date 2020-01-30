@@ -7,6 +7,8 @@ description="Workaround of the bug that prevents desktop files to launch a termi
 : ${SRC_FOLDERS:="/usr/share/applications"}
 : ${TERMCMD:="xterm -e"}
 
+modified_files = ""
+
 depend() {
 	after procfs
 }
@@ -14,18 +16,15 @@ depend() {
 start() {
 	ebegin "Copying relevant destkop files to $DEST_FOLDER"
 
-	create_file() {
-		name=$(basename $1)
-		sed "/^Terminal=/d;s/^Exec=/Exec=$TERMCMD /" $1 > $1
-	}
-
 	for src_folder in $SRC_FOLDERS ; do
 		for desktop_file in ${src_folder}/* ; do
 			if grep -q "Terminal=true" "$desktop_file" ; then
-				create_file $desktop_file
+				sed -i "s/^Terminal=true/Terminal=false/;s/^Exec=/Exec=$TERMCMD /" $1
 			fi
 		done
 	done
+
+	modified_files = "a list"
 
 	eend 0
 }
@@ -33,10 +32,12 @@ start() {
 stop() {
 	ebegin "Removing desktop files from $DEST_FOLDER"
 	
+	echo $modified_files
+
 	for src_folder in $SRC_FOLDERS ; do
 		for desktop_file in ${src_folder}/* ; do
 			if grep -q "Exec=$TERMCMD" "$desktop_file" ; then
-				sed "/^Terminal=/d;s/^Exec=$TERMCMD /Exec=/" $1 > $1
+				sed -i "/^Terminal=/d;s/^Exec=$TERMCMD /Exec=/" $1
 			fi
 		done
 	done
