@@ -31,7 +31,6 @@ stop() {
 	for src_folder in $SRC_FOLDERS ; do
 		for desktop_file in ${src_folder}/* ; do
 			if grep -q "Exec=$TERMCMD " "$desktop_file" ; then
-				echo $desktop_file
 				sed -i "s/^Terminal=false/Terminal=true/;s/^Exec=$TERMCMD /Exec=/" "$desktop_file"
 			fi
 		done
