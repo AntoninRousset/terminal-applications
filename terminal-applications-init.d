@@ -46,5 +46,3 @@ stop() {
 	eend 0
 }
 
-start
-stop
