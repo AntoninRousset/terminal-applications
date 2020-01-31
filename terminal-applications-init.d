@@ -7,7 +7,11 @@ description="Workaround of the bug that prevents desktop files to launch a termi
 : ${SRC_FOLDERS:="/usr/share/applications"}
 : ${TERMCMD:="xterm -e"}
 
-TERMCMDS="[aEkx]term -e|rxvt -e|gnome -e|konsole -e|interix -e|st -e|xterm -e"
+if [ "${TERMCMDS}" != "" ] ; then
+	TERMCMDS="${TERMCMDS}|"
+fi
+TERMCMDS="${TERMCMDS}[aEkx]term -e|rxvt -e|gnome -e|konsole -e|interix -e|st -e|xterm -e"
+echo "${TERMCMDS}"
 
 terminal_cmds=$(echo "${TERMCMDS}" | sed -r "s/\|/(\\\s|-\w*)*\|/g;s/\s/(\\\s|-\w*)*/g")
 terminal_parts=$(echo "${TERMCMDS}" | sed -r "s/(\s|-\w*)//g")"|-\w*|\s"
@@ -19,6 +23,7 @@ depend() {
 start() {
 	if ! echo "${TERMCMD}" | grep -Eq "(${terminal_cmds})" ; then
 		eend 1 "\"${TERMCMD}\" is not part of \"${TERMCMDS}\", please add it to TERMCMDS"
+		exit 1
 	fi
 
 	for src_folder in ${SRC_FOLDERS} ; do
