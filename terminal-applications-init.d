@@ -4,8 +4,7 @@
 
 description="Workaround of the bug that prevents desktop files to launch a terminal with Terminal=true"
 
-#: ${SRC_FOLDERS:="/usr/share/applications"}
-: ${SRC_FOLDERS:="/tmp/applications"}
+: ${SRC_FOLDERS:="/usr/share/applications"}
 : ${TERMCMD:="xterm -e"}
 
 TERMCMDS="[aEkx]term -e|rxvt -e|gnome -e|konsole -e|interix -e|st -e|xterm -e"
@@ -18,6 +17,10 @@ depend() {
 }
 
 start() {
+	if ! echo "${TERMCMD}" | grep -Eq "(${terminal_cmds})" ; then
+		eend 1 "\"${TERMCMD}\" is not part of \"${TERMCMDS}\", please add it to TERMCMDS"
+	fi
+
 	for src_folder in ${SRC_FOLDERS} ; do
 		ebegin "Changing destkop files in ${src_folder}"
 		for desktop_file in "${src_folder}/"* ; do
@@ -32,7 +35,7 @@ start() {
 
 stop() {
 	for src_folder in $SRC_FOLDERS ; do
-		ebegin "Reverting destkop files ${src_folder}"
+		ebegin "Reverting destkop files in ${src_folder}"
 		for desktop_file in "${src_folder}/"* ; do
 			if grep -Eq "Exec\s*=\s*(${terminal_cmds})" "${desktop_file}" ; then
 				sed -ri "s/^Terminal\s*=\s*false/Terminal=true/;s/^Exec\s*=(${terminal_parts})*/Exec=/" "${desktop_file}"
