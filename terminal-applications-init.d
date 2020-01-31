@@ -11,7 +11,6 @@ if [ "${TERMCMDS}" != "" ] ; then
 	TERMCMDS="${TERMCMDS}|"
 fi
 TERMCMDS="${TERMCMDS}[aEkx]term -e|rxvt -e|gnome -e|konsole -e|interix -e|st -e|xterm -e"
-echo "${TERMCMDS}"
 
 terminal_cmds=$(echo "${TERMCMDS}" | sed -r "s/\|/(\\\s|-\w*)*\|/g;s/\s/(\\\s|-\w*)*/g")
 terminal_parts=$(echo "${TERMCMDS}" | sed -r "s/(\s|-\w*)//g")"|-\w*|\s"
@@ -35,6 +34,8 @@ start() {
 		done
 	done
 
+	xdg-desktop-menu forceupdate
+
 	eend 0
 }
 
@@ -47,6 +48,8 @@ stop() {
 			fi
 		done
 	done
+
+	xdg-desktop-menu forceupdate
 
 	eend 0
 }
